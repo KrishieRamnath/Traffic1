@@ -58,22 +58,20 @@ def load_data(data_dir):
     be a list of integer labels, representing the categories for each of the
     corresponding `images`.
     """
-    images, labels = [], []
-
-    for category in range(0, NUM_CATEGORIES - 1):  # iterate over all directories
-        directories = os.path.join(data_dir, str(category))  # determine path to the directory
-        for filename in os.listdir(directories):  # iterate over all files in the directory
-            # don't forget to join the directory path with the filename
-            img = cv2.imread(os.path.join(directories, filename))
-            # resize the hell out of the image
-            img = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            # append the image and its corresponding category
-            images.append(img)
-            labels.append(category)
-
-    return images, labels
-
+    labels=list()
+    images=list()
+    dirs=os.listdir(data_dir)
+    for dir in dirs:
+        loc0=os.path.join(data_dir,dir)
+        category_dir=os.listdir(loc0)
+        for image in category_dir:
+            dsize=(IMG_WIDTH,IMG_HEIGHT)
+            loc1=os.path.join(loc0,image,)
+            img = cv2.imread(loc1)
+            res=cv2.resize(img,dsize)
+            images.append(res)
+            labels.append(int(dir))
+    return (images,labels)
 
 def get_model():
     """
@@ -82,36 +80,28 @@ def get_model():
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
     model = tf.keras.models.Sequential([
-
         tf.keras.layers.Conv2D(
-            32, (3, 3), activation='relu', input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+            8, (5, 5), activation="relu", input_shape=(IMG_HEIGHT,IMG_WIDTH, 3)
         ),
-
         tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
-
         tf.keras.layers.Conv2D(
-            32, (3, 3), activation='relu', input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+            32, (3, 3), activation="relu", input_shape=(IMG_HEIGHT,IMG_WIDTH, 3)
         ),
-
+        tf.keras.layers.Conv2D(
+            32, (3, 3), activation="relu", input_shape=(IMG_HEIGHT,IMG_WIDTH, 3)
+        ),
         tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
-
         tf.keras.layers.Flatten(),
-
-        tf.keras.layers.Dense(128, activation='relu'),
-        tf.keras.layers.Dense(128, activation='relu'),
-        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dense(128, activation="relu"),
+        tf.keras.layers.Dense(128, activation="relu"),
         tf.keras.layers.Dropout(0.5),
-
-        tf.keras.layers.Dense(NUM_CATEGORIES-1, activation='softmax')
-
+        tf.keras.layers.Dense(NUM_CATEGORIES, activation="softmax")
     ])
-
     model.compile(
-        optimizer='adam',
-        loss='categorical_crossentropy',
-        metrics=['accuracy']
+        optimizer="adam",
+        loss="categorical_crossentropy",
+        metrics=["accuracy"]
     )
-
     return model
 
 
